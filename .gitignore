@@ -1,0 +1,6 @@
+# build output and packages
+port/build_*/
+build/
+dist/
+*.o
+*.zip

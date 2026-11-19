@@ -1,0 +1,40 @@
+AmiScreamer - die Programme
+===========================
+
+AmiScreamer ist ein Port der OpenScreamer-Engine auf den Amiga (68040, 68060, 68080) und auf MorphOS.
+OpenScreamer von Danik: https://github.com/ItsDanik/openscreamer
+
+Dieser Ordner enthält nur die Programme, zum Aktualisieren einer bestehenden Installation: die Programme in die
+Schublade des Spiels kopieren (dort liegen DATA/, GFX/, CONFIG/ und MUSIC/). Eine neue Installation mit Spieldaten,
+Titellogo und Musik macht das Installationspaket (AmiScreamer_Install, "Install!").
+
+  amiscreamer_080                  Spiel für Vampire (68080)
+  amiscreamer_060                  Spiel für 68060
+  amiscreamer_040                  Spiel für 68040
+  amiscreamer_mos                  Spiel für MorphOS (PowerPC)
+  amiscreamer_launcher             der Starter (MUI), mit Catalogs/ für Deutsch
+  amiscreamer_server               Netzwerk-Server für AmigaOS (optional)
+  amiscreamer_server_mos           Netzwerk-Server für MorphOS (optional)
+  Linux/amiscreamer_server_x64     Netzwerk-Server für Linux, PC (optional)
+  Linux/amiscreamer_server_arm64   Netzwerk-Server für Linux, arm64, z. B. Raspberry Pi 3/4/5 (optional)
+
+Der Starter startet das Spiel; seine Einstellungen (CONFIG/AMIGA.CFG: Bildschirm, Ton, AHI-Modus, Netzwerk,
+Pad-Belegung) bleiben gültig. Der Starter hier hat kein Titellogo, das setzt erst die Installation ein: wer schon
+einen installierten Starter hat ("Screamer" bzw. "Bleifuss"), behält ihn einfach.
+
+Eigene Dateien (amiscreamer.cfg, Rekorde, Meisterschaft, Wiederholungen) legt das Spiel in seiner Schublade ab.
+
+
+Fremder Code
+------------
+Die AGA-Ausgabe benutzt die Chunky-to-Planar-Routinen der c2p.library 1.9 von Alimede Informatica (MIT-Lizenz):
+https://aminet.net/package/dev/misc/c2plib
+
+
+Haftungsausschluss
+------------------
+AmiScreamer ist ein inoffizielles, nicht kommerzielles Fanprojekt. Es steht in keiner Verbindung zu Milestone,
+Graffiti, Virgin Interactive Entertainment oder anderen Rechteinhabern des Spiels "Screamer" ("Bleifuss") und wird
+von ihnen weder unterstützt noch geprüft. "Screamer", "Bleifuss" und alle weiteren Namen und Marken gehören ihren
+jeweiligen Inhabern. Das Paket enthält keine Daten des Originalspiels; zum Spielen wird eine rechtmäßig erworbene
+Kopie (CD oder GOG-Fassung) benötigt. Die Benutzung erfolgt auf eigene Gefahr, ohne jede Gewährleistung (siehe LICENSE).
