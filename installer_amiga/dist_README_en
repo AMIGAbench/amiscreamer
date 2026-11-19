@@ -1,0 +1,40 @@
+AmiScreamer - the programs
+==========================
+
+AmiScreamer is a port of the OpenScreamer engine to the Amiga (68040, 68060, 68080) and to MorphOS.
+OpenScreamer by Danik: https://github.com/ItsDanik/openscreamer
+
+This drawer holds only the programs, for updating an existing installation: copy the programs into the game's drawer
+(where DATA/, GFX/, CONFIG/ and MUSIC/ are). A new installation with game data, title logo and music is done by the
+installation package (AmiScreamer_Install, "Install!").
+
+  amiscreamer_080                  game for Vampire (68080)
+  amiscreamer_060                  game for 68060
+  amiscreamer_040                  game for 68040
+  amiscreamer_mos                  game for MorphOS (PowerPC)
+  amiscreamer_launcher             the launcher (MUI), with Catalogs/ for German
+  amiscreamer_server               network server for AmigaOS (optional)
+  amiscreamer_server_mos           network server for MorphOS (optional)
+  Linux/amiscreamer_server_x64     network server for Linux, PC (optional)
+  Linux/amiscreamer_server_arm64   network server for Linux, arm64, e.g. Raspberry Pi 3/4/5 (optional)
+
+The launcher starts the game; its settings (CONFIG/AMIGA.CFG: screen, sound, AHI mode, network, pad buttons) stay
+valid. The launcher here has no title logo, only the installation adds it: if you already have an installed
+launcher ("Screamer" or "Bleifuss"), simply keep it.
+
+The game keeps its own files (amiscreamer.cfg, records, championship, replays) in its drawer.
+
+
+Third-party code
+----------------
+The AGA output uses the chunky-to-planar routines of c2p.library 1.9 by Alimede Informatica (MIT licence):
+https://aminet.net/package/dev/misc/c2plib
+
+
+Disclaimer
+----------
+AmiScreamer is an unofficial, non-commercial fan project. It is not affiliated with, endorsed by or reviewed by
+Milestone, Graffiti, Virgin Interactive Entertainment or any other rights holder of the game "Screamer"
+("Bleifuss"). "Screamer", "Bleifuss" and all other names and trademarks belong to their respective owners. The
+package contains no data of the original game; playing requires a legally obtained copy (CD or GOG version). Use at
+your own risk, without any warranty (see LICENSE).

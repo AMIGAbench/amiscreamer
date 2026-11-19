@@ -1,0 +1,34 @@
+AmiScreamer - History
+=====================
+
+v1.01
+-----
+- Installer: the installation from the GOG version failed with "GOG installer damaged (checksum)"; the installer's
+  helper had been built with a faulty zlib. Game files and music from the GOG installer now unpack correctly.
+- Installer: after the installation the game's drawer opens as a small window with the launcher, ReadMe and LICENSE;
+  the drawer of the installation package likewise shows only Install! and the two READMEs
+- Packages as LhA archives with the version in their name (AmiScreamer_Install_v1.01.lha)
+
+v1.0
+----
+First release.
+
+- Port of the OpenScreamer engine (Screamer, 1995) to the Amiga and to MorphOS:
+  programs for 68040, 68060, 68080 (Vampire) and PowerPC (MorphOS)
+- Screen: RTG 640x400, RTG 320x200, AGA 320x200, or a window on the Workbench (1x to 3x)
+- Sound: Paula, AHI or off; on MorphOS always AHI
+- Music: the tracks of the original CD, converted by the installer (from the CD or the GOG installer) or on a
+  Linux PC with amiscreamer_music.sh
+- Network game over TCP/IP (UDP port 10623): single race and championship (tracks 1-6, points 10-8-6-5-4-3-2-1);
+  one machine hosts, or a server of its own takes everyone in (AmigaOS, MorphOS, Linux x86-64 and arm64)
+- Launcher (MUI) with German catalog: screen, sound, AHI mode, keys, joypad and network
+- Installer: game data from the original CD "Screamer" or "Bleifuss", or from the installer of the GOG version
+- The game data and the game's own files (settings, records, championship, replays) in the game's drawer
+- Release programs without test switches and console output; a separate debug package (AmiScreamer_Debug)
+  with the benchmark
+
+Changes during the beta test:
+- Launcher: wrong button labels and broken layout on systems without the German catalog
+- Night track: the headlight beams were drawn over the car's body
+- Shadows were drawn over the car instead of underneath it
+- CD player (P in a race): a chosen track plays at once; the MU entry (MIDI music) is gone
