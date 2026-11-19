@@ -1,0 +1,101 @@
+AmiScreamer
+============
+
+AmiScreamer ist ein Port der Open-Source-Neuimplementierung der Screamer-Engine "OpenScreamer" von ItsDanik auf den
+Amiga (68040, 68060, 68080 + AGA/RTG) und auf MorphOS, mit zusätzlichen Fehlerbehebungen und erweitertem Mehrspieler-Modus. Das
+Paket enthält nur die Programme, keine Daten des Originalspiels "Screamer" (Deutsch: "Bleifuss"): **<ins>Spieldaten und
+Musik müssen bei der Installation von der Original-CD oder aus dem Installationsprogramm der GOG-Fassung kommen.</ins>**
+Die deutsche CD-Fassung "Bleifuss" wird ebenso unterstützt.
+
+OpenScreamer von Danik: https://github.com/ItsDanik/openscreamer
+
+
+Voraussetzungen
+---------------
+- Original-CD "Screamer" oder "Bleifuss" (1995), oder das Installationsprogramm der GOG-Fassung
+- Amiga mit 68040 oder 68060 und FPU, Vampire (68080) oder MorphOS (PowerPC)
+- etwa 64 MB Fast-RAM
+- RTG-Grafikkarte oder AGA
+- AmigaOS 3.x mit MUI 3.8 oder neuer (für den Starter)
+- etwa 40 MB freier Festplattenplatz, mit Musik etwa 180 MB
+
+
+Installation
+------------
+1. CD einlegen.
+2. "Install!" doppelklicken.
+3. CD-Laufwerk wählen (z. B. CD0:).
+4. Zielverzeichnis wählen. Dort wird die Schublade "Screamer" angelegt (mit der CD "Bleifuss" wird "Bleifuss" angelegt).
+5. Prozessor wählen: 68040, 68060, 68080 (Vampire) oder PowerPC (MorphOS).
+6. Der Installer kopiert die Spieldateien von der CD, schreibt die Konfiguration und setzt das Titellogo in den
+   Launcher ein.
+7. Musik: "Umwandeln" liest die Musikstücke von der CD und wandelt sie für Paula/AHI um. Das dauert je nach Rechner
+   und Laufwerk 10 bis 30 Minuten; der Fortschritt erscheint in einem eigenen Fenster, Ctrl-C bricht ab.
+   "Überspringen" lässt die Musik weg, das Spiel läuft auch ohne.
+
+
+Installation aus der GOG-Fassung
+--------------------------------
+Statt der CD geht auch das Windows-Installationsprogramm der GOG-Fassung. Es wird auf dem Amiga nicht ausgeführt,
+sondern nur gelesen; Windows und ein PC sind nicht nötig.
+
+1. Die Setup-EXE auf den Amiga kopieren (ca. 420 MB, z. B. nach Work:).
+2. "Install!" doppelklicken und als Quelle "GOG-Installationsprogramm" wählen, dann die Datei auswählen.
+3. Weiter wie oben (Ziel, Prozessor). Die Spieldateien werden entpackt und geprüft (Prüfsummen).
+4. Musik: "Umwandeln" entpackt die CD-Musik der GOG-Fassung und wandelt sie um; ein CD-Laufwerk ist nicht nötig.
+
+Danach kann die Setup-Datei wieder gelöscht werden. Hinweis: Die GOG-Fassung enthält für Strecke 5 in der hohen
+Auflösung die Daten der niedrigen; dort fehlen gegenüber der CD einzelne Objekte (z. B. eine Fußgängerbrücke).
+
+
+Spielen
+-------
+Gestartet wird mit dem Programm "Screamer" in der Schublade Screamer (mit der CD "Bleifuss" heißen Schublade und
+Programm "Bleifuss").
+Im Starter lassen sich Bildschirm (RTG 640x400, RTG 320x200, AGA 320x200, Fenster), Ton (Paula, AHI oder aus),
+AHI-Modus, Tasten, Joypad und Netzwerk einstellen und das Spiel starten. Die Musik wird im Spiel im Menü "Optionen"
+eingestellt. Auf MorphOS läuft der Ton immer über AHI.
+
+
+Netzwerkspiel
+-------------
+Über TCP/IP (UDP-Port 10623). Entweder ist ein Rechner Gastgeber (im Starter: Netzwerk HOST) und die anderen treten
+bei (JOIN mit der Adresse des Gastgebers), oder ein eigener Server ohne Spieler nimmt alle auf:
+
+ - amiscreamer_server
+ - amiscreamer_server_mos
+ - amiscreamer_server_x64
+ - amiscreamer_server_arm64
+
+Der Server wird in einer Shell bzw. einem Terminal gestartet (z. B. ./amiscreamer_server_x64); Ctrl-C beendet ihn.
+Alle Spieler treten ihm mit JOIN und seiner Adresse bei. Nur der Gastgeber bzw. der Server braucht eine Portfreigabe.
+
+
+Musik ohne Amiga erzeugen
+-------------------------
+Liest das CD-Laufwerk am Amiga keine Musik (kein CD-DA über SCSI/ATAPI) oder ist es zu langsam, lässt sich die Musik
+auf einem Linux-PC (x86-64 oder arm64) erzeugen. Dazu den Ordner "Linux" des Pakets auf den PC kopieren und dort im
+Terminal aufrufen:
+
+ - sh amiscreamer_music.sh                  CD im Laufwerk /dev/cdrom (anderes Laufwerk: --cd /dev/sr1)
+ - sh amiscreamer_music.sh --gog <datei>    aus dem GOG-Installationsprogramm
+ - sh amiscreamer_music.sh --wav <ordner>   schon gelesene Stücke (track02.wav bis track08.wav)
+
+Für die CD braucht es cdparanoia (Ubuntu/Debian: sudo apt install cdparanoia); sonst ist nichts zu installieren.
+Die Dateien track02.raw bis track08.raw landen im Ordner MUSIC (anderer Ort: -o <ordner>) und werden danach in die
+Schublade Screamer/MUSIC (bzw. Bleifuss/MUSIC) auf dem Amiga kopiert.
+
+
+Fremder Code
+------------
+Die AGA-Ausgabe benutzt die Chunky-to-Planar-Routinen der c2p.library 1.9 von Alimede Informatica (MIT-Lizenz):
+https://aminet.net/package/dev/misc/c2plib
+
+
+Haftungsausschluss
+------------------
+AmiScreamer ist ein inoffizielles, nicht kommerzielles Fanprojekt. Es steht in keiner Verbindung zu Milestone,
+Graffiti, Virgin Interactive Entertainment oder anderen Rechteinhabern des Spiels "Screamer" ("Bleifuss") und wird
+von ihnen weder unterstützt noch geprüft. "Screamer", "Bleifuss" und alle weiteren Namen und Marken gehören ihren
+jeweiligen Inhabern. Das Paket enthält keine Daten des Originalspiels; zum Spielen wird eine rechtmäßig erworbene
+Kopie (CD oder GOG-Fassung) benötigt. Die Benutzung erfolgt auf eigene Gefahr, ohne jede Gewährleistung (siehe LICENSE).

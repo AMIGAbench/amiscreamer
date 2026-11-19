@@ -1,0 +1,32 @@
+.key PROG/A
+.bra {
+.ket }
+; AmiScreamer benchmark: the standard scene (track 1, the robot drives 400 pictures, detail 1, no sound,
+; fixed ticks -- the same drive on every machine) at 640x400 and at 320x200.  The phase times go into
+; amiscreamer_bench_hi.log and amiscreamer_bench_lo.log in the game's drawer.
+;   CD <game drawer>
+;   Execute Benchmark amiscreamer_debug_060   (a debug program: the release ones have no test switches)
+Stack 1000000
+SetEnv OS_PHASES 1
+SetEnv OS_FRAMELOG 1
+SetEnv OS_DRIVE_DEMO 400
+SetEnv OS_NOSOUND 1
+SetEnv OS_TICKS 2
+SetEnv OS_DETAIL 1
+Echo "AmiScreamer benchmark: 640x400 ..."
+SetEnv OS_RES high
+SetEnv OS_LOGFILE amiscreamer_bench_hi.log
+{PROG} build/dec/MAP1 1
+Echo "AmiScreamer benchmark: 320x200 ..."
+SetEnv OS_RES low
+SetEnv OS_LOGFILE amiscreamer_bench_lo.log
+{PROG} build/dec/MAP1 1
+UnSetEnv OS_LOGFILE
+UnSetEnv OS_RES
+UnSetEnv OS_DETAIL
+UnSetEnv OS_TICKS
+UnSetEnv OS_NOSOUND
+UnSetEnv OS_DRIVE_DEMO
+UnSetEnv OS_FRAMELOG
+UnSetEnv OS_PHASES
+Echo "Done: please send amiscreamer_bench_hi.log and amiscreamer_bench_lo.log"
