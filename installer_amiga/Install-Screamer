@@ -1,0 +1,176 @@
+; $VER: Install! 2.0 (14.11.2026)
+; Installer-Skript für Screamer (AmiScreamer, Amiga/MorphOS), im Paket "Install!". Quelle: Original-CD oder
+; GOG-Installationsprogramm.
+; docs/amiga.md "Installation". Hilfsprogramm amiscreamer_inst: Konfiguration, Musik,
+; GOG-Paket (gog/gogmusic).
+
+(set #de (= @language "deutsch"))
+(set @app-name "Screamer")
+(set #src (tackon (pathonly @icon) "Files"))   ; Programme des Pakets
+(set #inst (tackon #src "amiscreamer_inst"))
+(set #iopt (if #de " -de" ""))
+
+(welcome
+  (if #de
+    "Willkommen zur Installation von Screamer (AmiScreamer) für Amiga und MorphOS.\n\nSie brauchen die Original-CD von Screamer (1995) oder das Installationsprogramm der GOG-Fassung (setup_screamer_....exe)."
+    "Welcome to the installation of Screamer (AmiScreamer) for the Amiga and MorphOS.\n\nYou need the original Screamer CD (1995) or the installer of the GOG version (setup_screamer_....exe)."))
+
+; ---------------------------------------------------------------- Quelle: CD oder GOG
+(set #gogsrc
+  (askchoice
+    (prompt (if #de "Woher sollen die Spieldaten kommen?" "Where should the game data come from?"))
+    (choices (if #de "Original-CD (Screamer oder Bleifuss)" "Original CD (Screamer or Bleifuss)")
+             (if #de "GOG-Installationsprogramm (setup_screamer_....exe)" "GOG installer (setup_screamer_....exe)"))
+    (default 0)
+    (help @askchoice-help)))
+
+(set #cd "CD0:")
+(set #gog "")
+(set #lname "Screamer")
+(if (= #gogsrc 1)
+  (
+    ; ------------------------------------------------------------ GOG: Installationsprogramm (vorher auf den Amiga kopiert)
+    (set #ok 0)
+    (while (= #ok 0)
+      (set #gog
+        (askfile
+          (prompt (if #de "Bitte das GOG-Installationsprogramm setup_screamer_....exe wählen (vorher auf den Amiga kopieren, ca. 420 MB)."
+                          "Please select the GOG installer setup_screamer_....exe (copy it to the Amiga first, about 420 MB)."))
+          (help @askfile-help)
+          (default (if (exists "Work:" (noreq)) "Work:" "SYS:"))))
+      (if (= 1 (exists #gog (noreq)))
+        (set #ok 1)
+        (message (if #de "Bitte eine Datei wählen." "Please select a file."))))
+  )
+  (
+; ---------------------------------------------------------------- CD
+(set #ok 0)
+(while (= #ok 0)
+  (set #cd
+    (askdir
+      (prompt (if #de "Bitte die Screamer-CD einlegen und das CD-Laufwerk wählen (z. B. CD0:)."
+                      "Please insert the Screamer CD and select the CD drive (e.g. CD0:)."))
+      (help @askdir-help)
+      (default #cd)
+      (disk)))
+  (if (and (exists (tackon #cd "START0/STARTH.EXE") (noreq)) (exists (tackon #cd "GFX/GRAF.DAT") (noreq)))
+    (set #ok 1)
+    (message
+      (if #de (cat "Auf " #cd " liegt keine Screamer-CD (START0/STARTH.EXE fehlt).")
+              (cat "No Screamer CD found in " #cd " (START0/STARTH.EXE missing).")))))
+
+; Deutsche Fassung "Bleifuss": gleicher Datenträgername SCREAMER, aber CONFIG/BLEIFUSS.ICO; Ordner und Starter heißen dann so
+(if (exists (tackon #cd "CONFIG/BLEIFUSS.ICO") (noreq)) (set #lname "Bleifuss"))
+  )
+)
+
+; ---------------------------------------------------------------- Ziel
+(set #dest
+  (askdir
+    (prompt (if #de (cat "Wohin soll " #lname " installiert werden?\nDort wird das Verzeichnis \"" #lname "\" angelegt.")
+                    (cat "Where should " #lname " be installed?\nA drawer \"" #lname "\" will be created there.")))
+    (help @askdir-help)
+    (default @default-dest)))
+(set #game (tackon #dest #lname))
+(set @default-dest #game)
+(makedir #game (infos))
+
+; ---------------------------------------------------------------- CPU
+(set #defcpu 1)
+(if (= (database "cpu") "68040") (set #defcpu 0))
+(if (= (database "cpu") "68080") (set #defcpu 2))
+(if (exists "MOSSYS:" (noreq)) (set #defcpu 3))
+(set #cpu
+  (askchoice
+    (prompt (if #de (cat "Für welchen Prozessor soll " #lname " installiert werden?")
+                    (cat "Which processor should " #lname " be installed for?")))
+    (choices "68040" "68060" "68080 (Vampire)" "PowerPC (MorphOS)")
+    (default #defcpu)
+    (help @askchoice-help)))
+(select #cpu
+  (set #prog "amiscreamer_040")
+  (set #prog "amiscreamer_060")
+  (set #prog "amiscreamer_080")
+  (set #prog "amiscreamer_mos"))
+
+; ---------------------------------------------------------------- Spieldateien
+(set @default-dest #game)
+(if (= #gogsrc 1)
+  (
+    (working (if #de "Spieldateien werden aus dem GOG-Installationsprogramm entpackt (Fortschritt im eigenen Fenster) ..."
+                     "Unpacking the game files from the GOG installer (progress in its own window) ..."))
+    (if (<> 0 (run (cat "\"" #inst "\"" #iopt " gog \"" #gog "\" \"" #game "\" >CON:20/20/560/160/"
+                        (if #de "Screamer-Dateien" "Screamer-Files") "/AUTO/CLOSE")))
+      (abort (if #de "Die Spieldateien konnten nicht aus dem GOG-Installationsprogramm entpackt werden. Unterstützt wird die GOG-Fassung 1.01 (Inno Setup 5.6)."
+                     "The game files could not be unpacked from the GOG installer. Supported is the GOG version 1.01 (Inno Setup 5.6).")))
+  )
+  (
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #cd "DATA")) (dest (tackon #game "DATA")) (all))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #cd "GFX")) (dest (tackon #game "GFX")) (all))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #cd "TABS")) (dest (tackon #game "TABS")) (all))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #cd "REPLAYS")) (dest (tackon #game "REPLAYS")) (all))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #cd "CONFIG")) (dest (tackon #game "CONFIG"))
+  (choices "DEFCTRL.CFG" "SETUP.DAT" "SCREAMER.ICO" "SETUP.ICO"))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #cd "START0")) (dest #game) (all))
+  )
+)
+
+; ---------------------------------------------------------------- Programme
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #src #prog)) (dest #game))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #src "amiscreamer_launcher")) (dest #game) (newname #lname))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #src "amiscreamer_launcher.info")) (dest #game)
+  (newname (cat #lname ".info")))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #src (if (= #cpu 3) "amiscreamer_server_mos" "amiscreamer_server")))
+  (dest #game))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #src "Catalogs")) (dest (tackon #game "Catalogs")) (all))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon (pathonly @icon) "LICENSE")) (dest #game))      ; GPL-3.0
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #src "LICENSE.info")) (dest #game))
+; die Anleitung in der Sprache der Installation als "ReadMe"
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon (pathonly @icon) (if #de "README_de" "README_en"))) (dest #game)
+  (newname "ReadMe"))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #src "ReadMe.info")) (dest #game))
+; das Piktogramm der Schublade mit ihrem Fenster: oben das Startersymbol, darunter ReadMe und LICENSE
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon #src "drawer.info")) (dest #dest) (newname (cat #lname ".info")))
+(copyfiles (prompt "") (help @copyfiles-help) (source (tackon (pathonly @icon) "History.txt")) (dest #game))
+(makedir (tackon #game "MUSIC"))
+; Dateien der CD sind schreib-/löschgeschützt (ISO 9660): Schutz im ganzen Verzeichnis zurücksetzen
+(run (cat "C:Protect \"" (tackon #game "#?") "\" rwed ADD ALL QUIET"))
+
+; ---------------------------------------------------------------- Konfiguration
+(working (if #de "Konfiguration wird geschrieben ..." "Writing configuration ..."))
+(if (<> 0 (run (cat "\"" #inst "\"" #iopt " cfg \"" #game "\"")))
+  (abort (if #de "Die Konfiguration konnte nicht geschrieben werden." "Could not write the configuration.")))
+(textfile
+  (dest (tackon #game "CONFIG/LAUNCHER.CFG"))
+  (append (cat "; Screamer Launcher\nPROGRAM=" (tackon #game #prog) "\nWINDOW=0\nSCALE=1\n")))
+
+; ---------------------------------------------------------------- Musik
+(if
+  (askbool
+    (prompt
+      (if #de
+        (cat (if (= #gogsrc 1) "Musik aus dem GOG-Installationsprogramm umwandeln?\n\nDie CD-Musik der GOG-Fassung wird entpackt und für Paula/AHI umgewandelt (MUSIC/trackNN.raw). Das dauert je nach Rechner einige Minuten bis eine halbe Stunde."
+                                "Musik von der CD umwandeln?\n\nDie CD-Musik wird gelesen und für Paula/AHI umgewandelt (MUSIC/trackNN.raw). Das dauert je nach Rechner und Laufwerk 10 bis 60 Minuten.")
+             "\n\nBeim Überspringen kann die Musik später auf einem Linux-PC mit dem Skript amiscreamer_music.sh (siehe README_de) erzeugt und nach " #lname "/MUSIC kopiert werden.")
+        (cat (if (= #gogsrc 1) "Convert the music from the GOG installer?\n\nThe CD music of the GOG version is unpacked and converted for Paula/AHI (MUSIC/trackNN.raw). Depending on the computer this takes a few minutes up to half an hour."
+                                "Convert the music from the CD?\n\nThe CD music is read and converted for Paula/AHI (MUSIC/trackNN.raw). Depending on computer and drive this takes 10 to 60 minutes.")
+             "\n\nIf you skip, the music can be created later on a Linux PC with the script amiscreamer_music.sh (see README_en) and copied to " #lname "/MUSIC.")))
+    (choices (if #de "Umwandeln" "Convert") (if #de "Überspringen" "Skip"))
+    (default 1)
+    (help @askbool-help))
+  (
+    (working (if #de "Musik wird umgewandelt (Fortschritt im eigenen Fenster, Ctrl-C bricht ab) ..."
+                     "Converting music (progress in its own window, Ctrl-C aborts) ..."))
+    (set #mrc (run (cat "\"" #inst "\"" #iopt (if (= #gogsrc 1) (cat " gogmusic \"" #gog) (cat " music \"" #cd)) "\" \"" (tackon #game "MUSIC")
+                        "\" >CON:20/20/560/120/" (if #de (cat #lname "-Musik") (cat #lname "-Music")) "/AUTO/CLOSE")))
+    (if (<> 0 #mrc)
+      (message
+        (if #de
+          "Die Musik konnte nicht (vollständig) umgewandelt werden. Sie lässt sich mit dem Linux-Skript amiscreamer_music.sh nachholen (siehe README_de). Das Spiel läuft auch ohne Musik."
+          "The music could not be converted (completely). It can be created later with the Linux script amiscreamer_music.sh (see README_en). The game also runs without music.")))))
+
+(set @default-dest #game)
+(exit
+  (if #de
+    (cat #lname " ist installiert in " #game ".\n\nGestartet wird über das Programm " #lname ".")
+    (cat #lname " has been installed in " #game ".\n\nStart it with the program " #lname ".")))

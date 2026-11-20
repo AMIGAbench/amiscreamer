@@ -1,0 +1,24 @@
+AmiScreamer - debug programs
+============================
+
+This drawer holds AmiScreamer with all its test and measuring functions (logs, timing, test drives, screenshots
+through the environment variables OS_...). The normal programs (amiscreamer_060 and so on) do not have them. The
+debug programs are meant for testers and for finding faults; for playing the normal ones are enough.
+
+  amiscreamer_debug_080            debug program for Vampire (68080)
+  amiscreamer_debug_060            debug program for 68060
+  amiscreamer_debug_040            debug program for 68040
+  amiscreamer_debug_mos            debug program for MorphOS (PowerPC)
+  Benchmark                        speed measurement, guide in Benchmark_en
+
+The programs belong in the drawer of the installed game (where DATA/, GFX/, CONFIG/ and MUSIC/ are) and are
+started from the Shell.
+
+
+Disclaimer
+----------
+AmiScreamer is an unofficial, non-commercial fan project. It is not affiliated with, endorsed by or reviewed by
+Milestone, Graffiti, Virgin Interactive Entertainment or any other rights holder of the game "Screamer"
+("Bleifuss"). "Screamer", "Bleifuss" and all other names and trademarks belong to their respective owners. The
+package contains no data of the original game; playing requires a legally obtained copy (CD or GOG version). Use at
+your own risk, without any warranty (see LICENSE).
