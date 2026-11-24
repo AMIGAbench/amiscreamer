@@ -1,0 +1,137 @@
+AmiScreamer
+============
+
+AmiScreamer is a port of the opensource reimplementation of the Screamer engine called "OpenScreamer" by ItsDanik to the
+Amiga (68040, 68060, 68080 + AGA/RTG) and to MorphOS with additional bugfixes and extended multiplayer support. The package contains
+only the programs and no data of the original game "Screamer" (German: "Bleifuss"): **<ins>game data and music must be provided from 
+the original CD or from the installer of the GOG version during the installation.</ins>**
+The German CD version "Bleifuss" is supported as well.
+
+OpenScreamer by Danik: https://github.com/ItsDanik/openscreamer
+
+<img width="756" height="421" alt="Bildschirmfoto_20261119_013440" src="https://github.com/user-attachments/assets/a4e44fbd-e0d1-43c4-9f12-4af16b7cf449" />
+
+
+Requirements
+------------
+- Original CD "Screamer" or "Bleifuss" (1995), or the installer of the GOG version
+- Amiga with 68040 or 68060 and FPU, Vampire (68080) or MorphOS (PowerPC)
+- about 64 MB of Fast RAM
+- RTG graphics card or AGA
+- AmigaOS 3.x with MUI 3.8 or newer (for the launcher)
+- about 40 MB of free hard disk space, about 180 MB with music
+
+
+Installation
+------------
+1. Insert the CD.
+2. Double-click "Install!".
+3. Choose the CD drive (e.g. CD0:).
+4. Choose the destination. A drawer "Screamer" is created there (with the "Bleifuss" CD, "Bleifuss" is created).
+5. Choose the processor: 68040, 68060, 68080 (Vampire) or PowerPC (MorphOS).
+6. The installer copies the game files from the CD and writes the configuration.
+7. Music: "Convert" reads the music tracks from the CD and converts them for Paula/AHI. Depending on computer and
+   drive this takes 10 to 30 minutes; the progress is shown in its own window, Ctrl-C aborts.
+   "Skip" leaves the music out, the game also runs without it.
+
+
+Installing from the GOG version
+-------------------------------
+Instead of the CD, the Windows installer of the GOG version can be used. It is not run on the Amiga, only read;
+neither Windows nor a PC is needed.
+
+1. Copy the setup exe to the Amiga (about 420 MB, e.g. to Work:).
+2. Double-click "Install!", choose "GOG installer" as the source and select the file.
+3. Continue as above (destination, processor). The game files are unpacked and verified (checksums).
+4. Music: "Convert" unpacks the CD music of the GOG version and converts it; no CD drive is needed.
+
+The setup file can be deleted afterwards. Note: for track 5 the GOG version contains the low resolution data in the
+high resolution as well; some objects of the CD version are missing there (e.g. a footbridge).
+
+
+Playing
+-------
+Start the game with the program "Screamer" in the Screamer drawer (with the "Bleifuss" CD drawer and program are
+called "Bleifuss").
+The launcher sets up screen (RTG 640x400, RTG 320x200, AGA 320x200, window), sound (Paula, AHI or off), AHI mode,
+keys, joypad and network and starts the game. The music is set in the game in the "Options" menu. On MorphOS the
+sound always goes through AHI.
+
+
+Network game
+------------
+Over TCP/IP (UDP port 10623). Either one machine hosts (in the launcher: network HOST) and the others join (JOIN
+with the host's address), or a server of its own, without a player, takes everyone in:
+
+ - amiscreamer_server
+ - amiscreamer_server_mos
+ - amiscreamer_server_x64
+ - amiscreamer_server_arm64
+
+The server is started in a shell or terminal (e.g. ./amiscreamer_server_x64); Ctrl-C ends it. 
+All players join it with JOIN and its address. Only the host or the server needs the port opened.
+
+
+Creating the music without an Amiga
+-----------------------------------
+If the CD drive of the Amiga does not deliver music (no CD-DA via SCSI/ATAPI) or is too slow, the music can be
+created on a Linux PC (x86-64 or arm64). Copy the drawer "Linux" of the package to the PC and run in a terminal there:
+
+ - sh amiscreamer_music.sh                  CD in the drive /dev/cdrom (other drive: --cd /dev/sr1)
+ - sh amiscreamer_music.sh --gog <file>     from the GOG installer
+ - sh amiscreamer_music.sh --wav <dir>      tracks already ripped (track02.wav to track08.wav)
+  
+For the CD it needs cdparanoia (Ubuntu/Debian: sudo apt install cdparanoia); nothing else has to be installed.
+The files track02.raw to track08.raw end up in the folder MUSIC (elsewhere: -o <dir>); copy them into the drawer
+Screamer/MUSIC (or Bleifuss/MUSIC) on the Amiga.
+
+
+Building
+--------
+The programs are cross-compiled on Linux (x86-64) in Docker containers: the host needs only Docker, bash, python3
+and iconv. No game data is needed to build. The Docker images are amigadev/crosstools:m68k-amigaos (Bebbo's gcc 6.5,
+vasm, the NDK, LhA), amigadev/crosstools:ppc-morphos and debian:bookworm-slim (the Linux programs).
+
+ - tools/amiga_build.sh CPU=68060         the game for the 68060 (CPU=68040 or 68080; DEBUG=1 the debug build)
+                                          -> port/build_amiga/<cpu>/openscreamer
+ - tools/amiga_build_mos.sh               the game and the network server for MorphOS -> port/build_mos/
+ - tools/amiga_launcher.sh                the MUI launcher and its German catalog -> build/launcher/
+ - tools/linux_progs.sh                   network server and music converter for Linux (x86-64, arm64) -> port/build_linux/
+ - tools/amiga_dist.sh                    all of the above, and the packages AmiScreamer and AmiScreamer_Debug
+ - tools/amiga_installer.sh               everything, and the installation package -> dist/amiga/*_v<version>.lha
+
+The version is VERSION_AMIGA (AmiScreamer) plus the OpenScreamer engine's number (VERSION, tools/version.sh); the
+AmigaDOS version strings carry the date of the last commit.
+
+About Screamer 2: port/src/main.c is OpenScreamer's game code, which also holds Danik's port of Screamer 2 (the
+s2_ functions declared in port/src/s2_port.h). AmiScreamer is Screamer 1 only, so the Screamer 2 sources are not in
+this repository. The Amiga builds compile with -DOS_NO_S2: os_game() in port/src/port.h is then the constant 1 and
+the compiler leaves out every Screamer 2 branch as dead code; the few calls it cannot see are never taken are
+answered by port/amiga/s2_none.c. The builds use -O2. For a build without optimisation (e.g. for a debugger) add
+OPT=-O0 (tools/amiga_build.sh CPU=68060 OPT=-O0 -> port/build_amiga/68060_O0/); s2_none.c and port/amiga/mos_stubs.c
+then supply empty versions of the remaining functions.
+
+
+Third-party code
+----------------
+The AGA output uses the chunky-to-planar routines of c2p.library 1.9 by Alimede Informatica (MIT licence):
+https://aminet.net/package/dev/misc/c2plib
+The SDL 2 headers in port/amiga/include (zlib licence) are used for their types and constants only; there is no
+SDL library in the programs: port/amiga/sdl_amiga.c implements the part of SDL the game uses, on AmigaOS.
+
+
+Disclaimer
+----------
+AmiScreamer is an unofficial, non-commercial fan project. It is not affiliated with, endorsed by or reviewed by
+Milestone, Graffiti, Virgin Interactive Entertainment or any other rights holder of the game "Screamer"
+("Bleifuss"). "Screamer", "Bleifuss" and all other names and trademarks belong to their respective owners. The
+package contains no data of the original game; playing requires a legally obtained copy (CD or GOG version). Use at
+your own risk, without any warranty (see LICENSE).
+
+<img width="1920" height="1080" alt="Screenshot 2026-11-19 01-23-19" src="https://github.com/user-attachments/assets/ef70952c-8660-4fdb-bcb3-63c5ddc3b93a" />
+
+<img width="1920" height="1080" alt="Screenshot 2026-11-19 01-23-39" src="https://github.com/user-attachments/assets/54e8ae07-958f-4dc8-885f-f05dac9c52ea" />
+
+<img width="1920" height="1080" alt="Screenshot 2026-11-19 01-23-52" src="https://github.com/user-attachments/assets/2c07bdfb-e8b6-4d99-8072-cca20d6579c0" />
+
+<img width="1920" height="1080" alt="Screenshot 2026-11-19 01-24-05" src="https://github.com/user-attachments/assets/327e8c25-8cd3-4252-8d80-497dfaab7b3f" />

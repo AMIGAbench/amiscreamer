@@ -1,0 +1,66 @@
+# The MorphOS build (PowerPC, native): tools/amiga_build_mos.sh -> port/build_mos/screamer_mos_ppc
+# The C ways only (no 68k kernels: the painter's rows span.c, the corners geo.c, the game's C twins), the PC's sound
+# (src/sound.c: the C mixer; the music only the CD's tracks MUSIC/trackNN.raw, amiga/mos_music.c) through AHI
+# (amiga/mos_audio.c); the Amiga's
+# platform (screen / window / keys, the launcher's options, the network) as on AmigaOS.  -ffp-contract=off: no fused
+# multiply-add (the PC's sums as they are written).
+CC      := ppc-morphos-gcc
+# DEBUG=1: the build with the test switches (amiscreamer_debug_mos); without it the release (amiga/os_release.h)
+DEBUG   ?= 0
+# OPT=-O0 (or -O1, -Og): another optimisation, built into build_mos_O0 ...; the release and the packages are -O2
+OPT     ?= -O2
+OUT     := build_mos$(if $(filter 1,$(DEBUG)),_debug)$(if $(filter -O2,$(OPT)),,_$(subst -,,$(OPT)))
+RELDEF  := $(if $(filter 1,$(DEBUG)),-DOS_DEBUG=1,-include amiga/os_release.h)
+CFLAGS  := -noixemul $(OPT) -std=gnu11 -fno-strict-aliasing -fno-common -ffp-contract=off -msdata=none -D_GNU_SOURCE \
+           -DAMIGA=1 -DOS_MOS=1 $(if $(TRACE),-DOS_MOS_TRACE=1) -DOS_OWN_SECTIONS=1 -DOS_MEMFILES -DS2_CONVERTED -DOS_NO_S2=1 -DOS_PAINTER=1 -DSPAN_C_ONLY -DGEO_C_ONLY \
+           -include amiga/mos_prefix.h $(RELDEF) -Iamiga/include -Iamiga -I$(OUT) -Wall -Wno-unused-function -Wno-unused-variable \
+           -Wno-unused-but-set-variable -Wno-misleading-indentation -Wno-unused-value
+LDFLAGS := -noixemul $(foreach f,stat opendir mkdir remove rename unlink getenv,-Wl,--wrap=$(f))
+# (fopen / freopen: not with --wrap -- MorphOS' libnix calls them itself while it starts, and wrapped the program
+# ends with 20 before main; our objects' calls renamed to amiga_path.c's instead, libnix's own left alone)
+FOPEN_W := --redefine-sym fopen=__wrap_fopen --redefine-sym freopen=__wrap_freopen
+LDLIBS  := -lm
+
+GAME    := src/main src/mesh src/unr src/scene src/drive src/port src/controls src/sound amiga/mos_music
+PLAT    := amiga/sdl_amiga amiga/amiga_video amiga/amiga_path amiga/oldargs amiga/s2_none amiga/render/span amiga/render/geo \
+           amiga/sys/mem amiga/net/net amiga/mos_audio amiga/mos_stubs
+GAMEOBJ := $(addprefix $(OUT)/,$(addsuffix .o,$(notdir $(GAME))))
+OBJS    := $(OUT)/os_own.o $(addprefix $(OUT)/,$(addsuffix .o,$(notdir $(PLAT))))
+HDRS    := $(wildcard src/*.h) $(wildcard amiga/*.h) amiga/net/net.h amiga/net/netgame.inc amiga/render/span.h amiga/render/geo.h
+
+all: $(OUT)/screamer_mos_ppc $(OUT)/amiscreamer_server_mos
+
+$(OUT):
+	mkdir -p $(OUT)
+# checked on every build (FORCE), replaced only when the version changed
+$(OUT)/os_version.h: FORCE | $(OUT)
+	@echo '#define OS_VERSION "$(OS_VERSION)"' > $@.new
+	@echo '#define OS_VERSTAG "$$VER: amiscreamer_$(if $(filter 1,$(DEBUG)),debug_)mos $(AMI_VER) ($(AMI_DATE))"' >> $@.new
+	@cmp -s $@.new $@ || mv $@.new $@; rm -f $@.new
+.PHONY: FORCE
+FORCE:
+
+define one
+$(OUT)/$(notdir $(1)).o: $(1).c $(HDRS) $(OUT)/os_version.h | $(OUT)
+	$(CC) $(CFLAGS) -c $$< -o $$@
+endef
+$(foreach f,$(GAME) $(PLAT),$(eval $(call one,$(f))))
+
+# the game's own statics in sections of their own (as the PC's CMakeLists.txt): what the program's parts save and put
+# back is those, nothing of the C library's (port.c, OS_OWN_SECTIONS)
+$(OUT)/os_own.o: $(GAMEOBJ)
+	ppc-morphos-ld -r -o $(OUT)/os_all.o $^
+	ppc-morphos-objcopy --rename-section .data=osdata --rename-section .data.rel.local=osdata \
+	  --rename-section .data.rel=osdata --rename-section .bss=osbss $(OUT)/os_all.o $@
+
+$(OUT)/screamer_mos_ppc: $(OBJS)
+	for o in $(filter-out %/amiga_path.o,$(OBJS)); do ppc-morphos-objcopy $(FOPEN_W) $$o $$o.w; done
+	ppc-morphos-objcopy --redefine-sym __real_fopen=fopen --redefine-sym __real_freopen=freopen $(OUT)/amiga_path.o $(OUT)/amiga_path.o.w
+	$(CC) $(LDFLAGS) $(addsuffix .w,$(OBJS)) -o $@ $(LDLIBS)
+
+$(OUT)/amiscreamer_server_mos: amiga/net/server.c amiga/net/net.c amiga/net/net.h $(OUT)/os_version.h | $(OUT)
+	$(CC) -noixemul -O2 -DAMIGA=1 -DOS_MOS=1 -DNET_SERVER -Iamiga '-DNET_VERSTAG="$$VER: amiscreamer_server_mos $(AMI_VER) ($(AMI_DATE))"' \
+	  -o $@ amiga/net/server.c amiga/net/net.c
+
+clean:
+	rm -rf $(OUT)
