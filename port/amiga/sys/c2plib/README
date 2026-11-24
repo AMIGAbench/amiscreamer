@@ -1,0 +1,4 @@
+c2p.library 1.9 (Alimede Informatica, MIT licence: LICENSE here), from Aminet dev/misc/c2plib: its 8-bitplane
+chunky-to-planar routines, the delta conversion among them, unchanged (src/c2p_8.s, c2p_8x8.s, c2p_8x8_mexg.s,
+c2p_8x8_mexg_040.s). AmiScreamer links them in (amiga/sys/c2p_68k.s c2pl_delta, amiga_video.c's AGA picture);
+the library itself is not needed.

@@ -1,0 +1,74 @@
+AmiScreamer - benchmark for beta testers
+========================================
+
+The benchmark measures how fast AmiScreamer runs on your Amiga. It drives a fixed scene: track 1, a robot drives
+400 pictures, detail level 1, no sound, fixed time steps. So the robot drives exactly the same way on every
+machine, and the figures can be compared between computers. It measures once at 640x400 and once at 320x200.
+
+
+Preparation
+-----------
+1. Install the game with the installation package ("Install!"). Choose your processor (68040, 68060 or 68080).
+   Then copy the script "Benchmark" and the debug program for your processor (amiscreamer_debug_040, _060 or
+   _080) from the drawer AmiScreamer_Debug into the game's drawer. Only the debug programs can measure; the normal
+   programs (amiscreamer_060 and so on) have no measuring in them.
+2. In the launcher choose an RTG screen (RTG 640x400 or RTG 320x200), not AGA. Close the launcher.
+3. Run as little else as possible (no other programs, no network transfers).
+
+
+Running the benchmark
+---------------------
+1. Open a Shell and change to the game's drawer, for example:
+     CD Work:Screamer
+   (with the German CD the drawer is called "Bleifuss")
+2. Start the benchmark with the program for your processor:
+     Execute Benchmark amiscreamer_debug_060      (68060)
+     Execute Benchmark amiscreamer_debug_040      (68040)
+     Execute Benchmark amiscreamer_debug_080      (Vampire, 68080)
+3. The game starts twice by itself, first at 640x400, then at 320x200. Each time the robot drives a short way and
+   the program ends by itself. Please do not press anything until "Done" appears in the Shell. Depending on the
+   computer this takes a few minutes.
+
+
+What to send back
+-----------------
+The two files from the game's drawer:
+  amiscreamer_bench_hi.log     (640x400)
+  amiscreamer_bench_lo.log     (320x200)
+
+And please tell us:
+  - CPU and clock (for example 68060 at 50 MHz)
+  - accelerator card
+  - graphics card (for example Picasso IV, CyberVision 64) and Zorro II or Zorro III
+  - AmigaOS version and RTG system (Picasso96 or CyberGraphX)
+  - anything unusual (picture errors, crash, hang), briefly described
+
+
+Reading the figures
+-------------------
+The logs contain lines like:
+  phases (ms a picture): game 3.00  backdrop 1.75  geometry 12.61  painting 42.03  rest 4.03  copy 0.03  = 63.47
+
+These are milliseconds per picture, each the mean of 50 pictures:
+  game       game logic (driving, opponents, sound control)
+  backdrop   sky and backdrop
+  geometry   turning the track and the cars into screen positions
+  painting   drawing the polygons
+  rest       the displays (speedometer, radar, texts)
+  copy       copying the finished picture into the graphics card
+  = ...      total per picture
+
+1000 divided by the total gives the pictures per second. The first line of each file still includes the loading
+and does not count.
+
+The timing uses the E-clock (timer.device, ReadEClock), so the milliseconds are right on every computer,
+whatever the CPU's clock.
+
+
+For comparison
+--------------
+Vampire V1200 (68080), program amiscreamer_debug_060:    640x400  63.5 ms (about 16 pictures/s)
+                                                          320x200  33.2 ms (about 30 pictures/s)
+On a real 68060 the copy over the Zorro bus into the graphics card comes on top (column "copy").
+
+Thank you for testing!
